@@ -13,8 +13,7 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-<<<<<<< HEAD
-        widget.cpp \
+    widget.cpp \
     qrwidget.cpp \
     qrencode/qrencode.c \
     qrencode/bitstream.c \
@@ -38,12 +37,7 @@ HEADERS  += widget.h \
     qrencode/qrspec.h \
     qrencode/rscode.h \
     qrencode/split.h
-=======
-        widget.cpp
-
-HEADERS  += widget.h
->>>>>>> a0704cdfb69a2f6500e41ff290152659cde81b18
 
 FORMS    += widget.ui
 
-include(QZXing.pri)
+include(QZXing/QZXing.pri)
