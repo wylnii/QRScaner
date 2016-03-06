@@ -1,66 +1,127 @@
 #include "qrwidget.h"
-
 #include <QPainter>
-#include <QDebug>
-#include <errno.h>
+#include <QImage>
 
-//extern "C"
-//{
-#include <qrencode/qrencode.h>
-//}
-
-QRWidget::QRWidget(QWidget *parent) :
-    QWidget(parent),
-    data("Hello QR")//Note: The encoding fails with empty string so I just default to something else. Use the setQRData() call to change this.
+QRWidget::QRWidget(QWidget *parent) : QWidget(parent)
 {
+    qr = NULL;
+    setQRData("Hello QR Code");
+}
+
+QRWidget::~QRWidget()
+{
+    if(qr != NULL)
+    {
+        QRcode_free(qr);
+    }
+}
+
+int QRWidget::getQRWidth() const
+{
+    if(qr != NULL)
+    {
+        return qr->width;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 void QRWidget::setQRData(QString data)
 {
-    this->data=data;
+    QRData = data;
+    if(qr != NULL)
+    {
+        QRcode_free(qr);
+    }
+    qr = QRcode_encodeString(QRData.toStdString().c_str(),
+                             1,
+                             QR_ECLEVEL_L,
+                             QR_MODE_8,
+                             1);
     update();
+}
+
+QSize QRWidget::sizeHint()  const
+{
+    QSize s;
+    if(qr != NULL)
+    {
+        int qr_width = qr->width > 0 ? qr->width : 1;
+        s = QSize(qr_width * 4, qr_width * 4);
+    }
+    else
+    {
+        s = QSize(50, 50);
+    }
+    return s;
+}
+
+QSize QRWidget::minimumSizeHint()  const
+{
+    QSize s;
+    if(qr != NULL)
+    {
+        int qr_width = qr->width > 0 ? qr->width : 1;
+        s = QSize(qr_width, qr_width);
+    }
+    else
+    {
+        s = QSize(50, 50);
+    }
+    return s;
+}
+
+bool QRWidget::saveImage(const QString &fileName, int size, int quality, const char* format)
+{
+    if(size != 0 && !fileName.isEmpty())
+    {
+        QImage image(size, size, QImage::Format_Mono);
+        QPainter painter(&image);
+        draw(painter, size, size);
+        return image.save(fileName, format, quality);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void QRWidget::draw(QPainter &painter, int width, int height)
+{
+    if(NULL != qr)
+    {
+        QColor background(Qt::white);
+        painter.setBrush(background);
+        painter.setPen(Qt::NoPen);
+        painter.drawRect(0, 0, width, height);
+
+        QColor foreground(Qt::black);
+        painter.setBrush(foreground);
+        const int qr_width = qr->width > 0 ? qr->width : 1;
+        const double scale=(double)((width > height) ? height : width)/qr_width*0.9;
+        const int x_first = (width - scale*qr_width)/2;
+        const int y_first = (height - scale*qr_width)/2;
+
+        unsigned char *data = qr->data;
+        for( int y = 0; y < qr_width; y ++)
+        {
+            for(int x = 0; x < qr_width; x++)
+            {
+                unsigned char b = *data++;
+                if(b & 0x01)
+                {
+                    QRectF rect(x * scale + x_first, y * scale + y_first, scale, scale);
+                    painter.drawRect(rect);
+                }
+            }
+        }
+    }
 }
 
 void QRWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    //NOTE: I have hardcoded some parameters here that would make more sense as variables.
-    QRcode *qr = QRcode_encodeString(data.toStdString().c_str(), 1, QR_ECLEVEL_L, QR_MODE_8, 1);
-    if(0!=qr)
-    {
-        QColor fg(Qt::black);
-        QColor bg(Qt::white);
-        painter.setBrush(bg);
-        painter.setPen(Qt::NoPen);
-        painter.drawRect(0,0,width(),height());
-        painter.setBrush(fg);
-        const int s=qr->width>0?qr->width:1;
-        const double w=width();
-        const double h=height();
-        const double aspect=w/h;
-        const double scale=((aspect>1.0)?h:w)/s;
-        for(int y=0;y<s;y++)
-        {
-            const int yy=y*s;
-            for(int x=0;x<s;x++)
-            {
-                const int xx=yy+x;
-                const unsigned char b=qr->data[xx];
-                if(b &0x01){
-                    const double rx1=x*scale, ry1=y*scale;
-                    QRectF r(rx1, ry1, scale, scale);
-                    painter.drawRects(&r,1);
-                }
-            }
-        }
-        QRcode_free(qr);
-    }
-    else
-    {
-        QColor error("red");
-        painter.setBrush(error);
-        painter.drawRect(0,0,width(),height());
-        qDebug()<<"QR FAIL: "<< strerror(errno);
-    }
-    qr=0;
+    draw(painter, width(), height());
 }

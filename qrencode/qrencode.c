@@ -108,7 +108,7 @@ static int RSblock_init(RSblock *blocks, int spec[5], unsigned char *data, unsig
 	return 0;
 }
 
-#define __STATIC
+#define __STATIC static
 __STATIC void QRraw_free(QRRawCode *raw);
 __STATIC QRRawCode *QRraw_new(QRinput *input)
 {
@@ -910,19 +910,19 @@ QRcode_List *QRcode_encodeStringStructured(const char *string, int version, QRec
 void QRcode_APIVersion(int *major_version, int *minor_version, int *micro_version)
 {
 	if(major_version != NULL) {
-        *major_version = 1;
+        *major_version = 3;
 	}
 	if(minor_version != NULL) {
-        *minor_version = 1;
+        *minor_version = 4;
 	}
 	if(micro_version != NULL) {
-        *micro_version = 1;
+        *micro_version = 4;
 	}
 }
 
 char *QRcode_APIVersionString(void)
 {
-    return 1;
+    return "3.4.4";
 }
 
 void QRcode_clearCache(void)

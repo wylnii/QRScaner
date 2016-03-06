@@ -126,7 +126,6 @@ HEADERS += $$PWD/QZXing_global.h \
     $$PWD/zxing/zxing/WriterException.h
 
 SOURCES += $$PWD/CameraImageWrapper.cpp \
-    $$PWD/qzxing.cpp \
     $$PWD/imagehandler.cpp \
     $$PWD/zxing/zxing/ResultIO.cpp \
     $$PWD/zxing/zxing/InvertedLuminanceSource.cpp \
@@ -227,7 +226,8 @@ SOURCES += $$PWD/CameraImageWrapper.cpp \
     $$PWD/zxing/bigint/BigUnsigned.cc \
     $$PWD/zxing/bigint/BigIntegerUtils.cc \
     $$PWD/zxing/bigint/BigIntegerAlgorithms.cc \
-    $$PWD/zxing/bigint/BigInteger.cc
+    $$PWD/zxing/bigint/BigInteger.cc \
+    $$PWD/QZXing.cpp
 
 symbian {
     TARGET.UID3 = 0xE618743C

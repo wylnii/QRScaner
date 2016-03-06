@@ -32,7 +32,7 @@ void Widget::on_pushButton_clicked()
     QScreen *screen = QApplication::primaryScreen();
 
 //    QRect rect(this->geometry());
-    QPixmap pic = screen->grabWindow(this->winId());
+    QPixmap pic = screen->grabWindow(ui->widget->winId());
 //    QPixmap pic = screen->grabWindow(QApplication::desktop()->winId(),rect.x(),rect.y(),rect.width(),rect.height());
     pic.save("window.jpg","jpg",100);
     QImage img = pic.toImage();
@@ -44,4 +44,5 @@ void Widget::on_pushButton_clicked()
 void Widget::on_pushButton_2_clicked()
 {
     ui->widget->setQRData(ui->lineEdit->text());
+    ui->widget->saveImage("qr.png",200);
 }
